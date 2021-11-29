@@ -1,8 +1,12 @@
 package com.example.login
 
+import android.app.Activity
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.Toast
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import com.example.login.databinding.ActivityLoginBinding
 
 class LoginActivity : AppCompatActivity() {
@@ -15,6 +19,27 @@ class LoginActivity : AppCompatActivity() {
         val EXTRA_USERNAME = "username" // key for key-value pair for the intent extras
         val EXTRA_PASSWORD = "password"
     }
+
+    // starting an activity for a result
+    // Step 1: Register the Activity with a contract
+    val startRegistrationForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult())
+    { result: ActivityResult ->
+        // decide what to do if the result is ok (if it was successful)
+        if (result.resultCode == Activity.RESULT_OK)
+        {
+            val intent = result.data
+            // Handle the Intent
+            // Note: editTexts are different than textViews in that you must call setText
+            binding.editTextLoginUsername.setText(intent?.getStringExtra(LoginActivity.EXTRA_USERNAME))
+            binding.editTextLoginPassword.setText(intent?.getStringExtra(LoginActivity.EXTRA_PASSWORD))
+        }
+        else
+        {
+            Toast.makeText(this, "Registration canceled: Empty username and/or password", Toast.LENGTH_SHORT).show()
+        }
+        // decide what to do if the result is unsuccessful with RESULT_CANCELED
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,7 +61,11 @@ class LoginActivity : AppCompatActivity() {
                 putExtra(EXTRA_PASSWORD, password)
             }
             // 3. launch the activity
-            startActivity(registrationIntent)
+            //startActivity(registrationIntent)
+
+            // 3b. Alternate: Could launch the activity for a result instead
+            startRegistrationForResult.launch(registrationIntent)
+
         }
 
     }
